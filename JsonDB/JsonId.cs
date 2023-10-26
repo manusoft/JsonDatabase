@@ -1,22 +1,14 @@
-﻿namespace JsonDB;
+﻿using System.Text.Json.Serialization;
+
+namespace JsonDB;
 
 public class JsonId
 {
-    public string _Id { get; set; }
+    public string ObjectId { get; set; }
 
     public JsonId()
     {
-        _Id = Guid.NewGuid().ToString(); // Generate a new unique ID.
-    }
-
-    public JsonId(string value)
-    {
-        _Id = value;
-    }
-
-    public override string ToString()
-    {
-        return _Id;
+        ObjectId = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
     }
 }
 

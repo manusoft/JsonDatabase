@@ -29,7 +29,8 @@ public class JsonDB
 
     public JsonDocument<T> Document<T>(string documentName)
     {
-        var existingDoc = _documents.FirstOrDefault(doc => doc.Name == documentName);
+        var existingDoc = _documents.FirstOrDefault(doc => doc.Object == documentName);
+
         if (existingDoc != null)
         {
             return new JsonDocument<T>(existingDoc, documentName);
@@ -38,12 +39,13 @@ public class JsonDB
         {
             var newDocInfo = new DocumentInfo
             {
-                Id = Guid.NewGuid().ToString(),
-                Name = documentName,
-                FilePath = $"{documentName}.jdoc"
+                Id = Convert.ToBase64String(Guid.NewGuid().ToByteArray()),
+                Object = documentName,
             };
+
             _documents.Add(newDocInfo);
             SaveChanges();
+
             return new JsonDocument<T>(newDocInfo, documentName);
         }
     }
@@ -53,11 +55,26 @@ public class JsonDB
         string jsonData = JsonSerializer.Serialize(_documents);
         File.WriteAllText(_databaseFile, jsonData);
     }
+
+    public void DeleteDocument<T>(string documentName)
+    {
+        var existingDoc = _documents.FirstOrDefault(doc => doc.Object == documentName);
+        if (existingDoc != null)
+        {
+            _documents.Remove(existingDoc);
+            File.Delete($"{documentName}.json");
+            SaveChanges();
+        }
+    }
+
+    public List<string> GetDocumentNames()
+    {
+        return _documents.Select(doc => doc.Object).ToList();
+    }
 }
 
 public class DocumentInfo
 {
     public string Id { get; set; }
-    public string Name { get; set; }
-    public string FilePath { get; set; }
+    public string Object { get; set; }
 }
